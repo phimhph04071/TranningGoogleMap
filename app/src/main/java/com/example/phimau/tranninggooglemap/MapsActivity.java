@@ -201,25 +201,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void hideActionBar() {
-        toolbarHight = toolbar.getHeight();
-        mVaActionBar = ValueAnimator.ofInt(toolbarHight, 0);
-        mVaActionBar.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                ((AppBarLayout.LayoutParams) toolbar.getLayoutParams()).height
-                        = (Integer) valueAnimator.getAnimatedValue();
-                toolbar.requestLayout();
-            }
-        });
-        mVaActionBar.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                getSupportActionBar().hide();
-            }
-        });
-        mVaActionBar.setDuration(300);
-        mVaActionBar.start();
+        if (getSupportActionBar().isShowing()) {
+            toolbarHight = toolbar.getHeight();
+            mVaActionBar = ValueAnimator.ofInt(toolbarHight, 0);
+            mVaActionBar.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                    ((AppBarLayout.LayoutParams) toolbar.getLayoutParams()).height
+                            = (Integer) valueAnimator.getAnimatedValue();
+                    toolbar.requestLayout();
+                }
+            });
+            mVaActionBar.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    getSupportActionBar().hide();
+                }
+            });
+            mVaActionBar.setDuration(300);
+            mVaActionBar.start();
+        }
     }
 
     private void showActionBar() {
