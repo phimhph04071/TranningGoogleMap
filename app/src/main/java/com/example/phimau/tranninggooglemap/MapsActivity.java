@@ -1,5 +1,8 @@
 package com.example.phimau.tranninggooglemap;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -7,10 +10,17 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
+import android.view.animation.AccelerateInterpolator;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -18,6 +28,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -33,17 +44,22 @@ import java.security.Provider;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private Marker mMarker;
     private LatLng mlLatLng;
     private LocationManager mLocationManager;
-    private boolean isMapReadly =false;
+    private boolean isMapReadly = false;
+    private FloatingActionButton btnCurrnentLocation;
+    private FloatingActionButton btnDirection;
+    private Toolbar toolbar;
+    private ValueAnimator mVaActionBar;
+    private int toolbarHight;
     private final LocationListener mLocationListener = new LocationListener() {
         @Override
         public void onLocationChanged(final Location location) {
-                mlLatLng =new LatLng(location.getLatitude(),location.getLongitude());
+            mlLatLng = new LatLng(location.getLatitude(), location.getLongitude());
         }
 
         @Override
@@ -69,34 +85,57 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
+        init();
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             return;
         }
-        String provider = mLocationManager.getBestProvider(new Criteria(),true);
+        String provider = mLocationManager.getBestProvider(new Criteria(), true);
         mLocationManager.requestLocationUpdates(provider, 0, 0, mLocationListener);
         Location location = mLocationManager.getLastKnownLocation(provider);
-        mlLatLng = new LatLng(location.getLatitude(),location.getLongitude());
+        mlLatLng = new LatLng(location.getLatitude(), location.getLongitude());
     }
 
-
+    private void init() {
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        btnCurrnentLocation = (FloatingActionButton) findViewById(R.id.fabCurenntLocation);
+        btnCurrnentLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                backCurrentLocation();
+                showActionBar();
+                Toast.makeText(getApplicationContext(), toolbar.getHeight() + "", Toast.LENGTH_SHORT).show();
+            }
+        });
+        btnDirection = (FloatingActionButton) findViewById(R.id.fabDirection);
+        btnDirection.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getApplicationContext(), "btnDirection", Toast.LENGTH_SHORT).show();
+                hideActionBar();
+//                toolbar.animate().translationY(-toolbar.getHeight()).setInterpolator(new AccelerateInterpolator(2)).withEndAction(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        getSupportActionBar().hide();
+//                    }
+//                });
+            }
+        });
+    }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        isMapReadly= true;
+        isMapReadly = true;
         mMap = googleMap;
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mlLatLng,15));
-        mMarker= mMap.addMarker(new MarkerOptions()
-                .icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(),R.drawable.ic_location)))
-        .position(mlLatLng));
-        Log.d("My",mlLatLng.latitude+"");
-        Log.d("My",mlLatLng.longitude+"");
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mlLatLng, 15));
+        mMarker = mMap.addMarker(new MarkerOptions()
+                .icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_location)))
+                .position(mlLatLng));
         PolylineOptions polylineOptions = new PolylineOptions();
-        List<LatLng> list= decodePoly("cvm_Cqo`dSBjID~QkDCaIGw@@O\\m@xAZLZPoArCSj@?HGZKLGBg@v@CJV^JLJZBTK\\DXh@~Av@vBt@rBdAfCHPM~@]dCSbBa@tBJBl@ZY?wDs@sBe@qBE");
-        Toast.makeText(getApplicationContext(),list.size()+"",Toast.LENGTH_SHORT).show();
-        for (int i=0;i<list.size();i++){
+        List<LatLng> list = decodePoly("cvm_Cqo`dSBjID~QkDCaIGw@@O\\m@xAZLZPoArCSj@?HGZKLGBg@v@CJV^JLJZBTK\\DXh@~Av@vBt@rBdAfCHPM~@]dCSbBa@tBJBl@ZY?wDs@sBe@qBE");
+        for (int i = 0; i < list.size(); i++) {
             polylineOptions.add(list.get(i));
 
         }
@@ -122,6 +161,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //                });
 
     }
+
     private List<LatLng> decodePoly(String encoded) {
 
         List<LatLng> poly = new ArrayList<LatLng>();
@@ -154,8 +194,53 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         return poly;
     }
-    private void backCurrentLocation(){
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mlLatLng,15));
+
+    private void backCurrentLocation() {
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mlLatLng, 15), 500, null);
         mMarker.setPosition(mlLatLng);
+    }
+
+    private void hideActionBar() {
+        toolbarHight = toolbar.getHeight();
+        mVaActionBar = ValueAnimator.ofInt(toolbarHight, 0);
+        mVaActionBar.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                ((AppBarLayout.LayoutParams) toolbar.getLayoutParams()).height
+                        = (Integer) valueAnimator.getAnimatedValue();
+                toolbar.requestLayout();
+            }
+        });
+        mVaActionBar.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                getSupportActionBar().hide();
+            }
+        });
+        mVaActionBar.setDuration(300);
+        mVaActionBar.start();
+    }
+
+    private void showActionBar() {
+        if (!getSupportActionBar().isShowing()) {
+            mVaActionBar = ValueAnimator.ofInt(0, toolbarHight);
+            mVaActionBar.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                    toolbar.getLayoutParams().height = (Integer) valueAnimator.getAnimatedValue();
+                    toolbar.requestLayout();
+                }
+            });
+            mVaActionBar.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    super.onAnimationStart(animation);
+                    getSupportActionBar().show();
+                }
+            });
+            mVaActionBar.setDuration(300);
+            mVaActionBar.start();
+        }
     }
 }
