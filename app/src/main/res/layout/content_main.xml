@@ -9,9 +9,24 @@
     tools:context="com.example.phimau.tranninggooglemap.MainActivity"
     tools:showIn="@layout/activity_main">
 
-    <fragment android:id="@+id/map"
+    <fragment
+        android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context="com.example.phimau.tranninggooglemap.MapsActivity" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/ivDragLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:paddingBottom="24dp"
+            android:src="@drawable/ic_action_name" />
+    </LinearLayout>
+
 </RelativeLayout>

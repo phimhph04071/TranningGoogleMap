@@ -1,6 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/toolbar"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:animateLayoutChanges="true"
+    android:background="?attr/colorPrimary"
+    app:layout_scrollFlags="scroll|enterAlways"
+    app:popupTheme="@style/AppTheme.PopupOverlay">
 
-</LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="16dp"
+        android:paddingLeft="32dp"
+        android:paddingRight="48dp"
+        android:paddingTop="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="8dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_start_location" />
+
+            <EditText
+                android:id="@+id/etOrigin"
+                android:layout_width="match_parent"
+                android:layout_height="28dp"
+                android:background="#1565C0"
+                android:enabled="true"
+                android:focusable="false"
+                android:hint="Your location"
+                android:paddingLeft="16dp"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_end_location" />
+
+            <EditText
+                android:id="@+id/etDestination"
+                android:layout_width="match_parent"
+                android:layout_height="28dp"
+                android:background="#1565C0"
+                android:enabled="true"
+                android:focusable="false"
+                android:hint="Destination location"
+                android:paddingLeft="16dp"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</android.support.v7.widget.Toolbar>
