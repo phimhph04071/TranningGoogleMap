@@ -77,6 +77,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private String ogLocation;
     private String desnLocation;
     private Marker dirMaker;
+    private Marker ogMaker;
     private ArrayList<Polyline> listPolyOption;
     private boolean isgetDesLocation;
     private static final String TAG = "local";
@@ -85,6 +86,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         @Override
         public void onLocationChanged(final Location location) {
             mlLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+            mMarker.setPosition(mlLatLng);
         }
 
         @Override
@@ -115,22 +117,25 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onClick(View view) {
                 Toast.makeText(getApplicationContext(), "etOrigin", Toast.LENGTH_SHORT).show();
-                btnDirection.setVisibility(View.GONE);
-                linearLayout.setVisibility(View.VISIBLE);
-                imgDragLocation.setVisibility(View.VISIBLE);
+                isgetDesLocation = false;
+                hideDirButton();
             }
         });
         etdestination.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                linearLayout.setVisibility(View.VISIBLE);
                 isgetDesLocation = true;
-                imgDragLocation.setVisibility(View.VISIBLE);
+                hideDirButton();
             }
         });
 
 
+    }
 
+    private void hideDirButton() {
+        btnDirection.setVisibility(View.GONE);
+        linearLayout.setVisibility(View.VISIBLE);
+        imgDragLocation.setVisibility(View.VISIBLE);
     }
 
     private void init() {
@@ -158,13 +163,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 btnDirection.setVisibility(View.GONE);
                 Toast.makeText(getApplicationContext(), toolbarHight + "", Toast.LENGTH_SHORT).show();
                 showActionBar();
-                desnLocation=null;
-                ogLocation=null;
-                for(Polyline line : listPolyOption)
-                {
-                    line.remove();
-                }
-                listPolyOption.clear();
+                clearMap();
             }
         });
         btnCanel.setOnClickListener(new View.OnClickListener() {
@@ -181,12 +180,40 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View view) {
                 imgDragLocation.setVisibility(View.GONE);
                 LatLng curLocation = getLocationCenterCamrare();
+                String url = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + curLocation.latitude + "," + curLocation.longitude + "&key=AIzaSyChRAy02k1tKj5kvpHqBx6ZZPE2PaMVv1c";
+                Ion.with(getApplicationContext())
+                        .load(url)
+                        .asString()
+                        .setCallback(new FutureCallback<String>() {
+                            @Override
+                            public void onCompleted(Exception e, String result) {
+                                try {
+                                    JSONObject object = new JSONObject(result);
+                                    if (object.getString("status").trim().equals("OK")) {
+                                        JSONArray jsonArray = object.getJSONArray("results");
+                                        JSONObject detailOjb = jsonArray.getJSONObject(0);
+                                        if (isgetDesLocation)
+                                            etdestination.setText(detailOjb.getString("formatted_address"));
+                                        else
+                                            etOrigin.setText(detailOjb.getString("formatted_address"));
+
+                                    }
+                                } catch (JSONException e1) {
+                                    e1.printStackTrace();
+                                }
+                            }
+                        });
+
                 if (isgetDesLocation) {
-                    desnLocation = curLocation.latitude+","+curLocation.longitude;
+                    desnLocation = curLocation.latitude + "," + curLocation.longitude;
                     dirMaker = mMap.addMarker(new MarkerOptions()
-                    .position(curLocation));
+                            .position(curLocation));
+
                 } else {
-                    ogLocation = curLocation.latitude+","+curLocation.longitude;
+                    ogLocation = curLocation.latitude + "," + curLocation.longitude;
+                    ogMaker = mMap.addMarker(new MarkerOptions()
+                            .icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ic_origin_location)))
+                            .position(curLocation));
                 }
                 checkDone();
                 linearLayout.setVisibility(View.GONE);
@@ -195,11 +222,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
+    private void clearMap() {
+        desnLocation = null;
+        ogLocation = null;
+        for (Polyline line : listPolyOption) {
+            line.remove();
+        }
+        listPolyOption.clear();
+        ogMaker.remove();
+        dirMaker.remove();
+    }
+
     private void checkDone() {
-        if (desnLocation!=null&&ogLocation!=null){
-            String url ="https://maps.googleapis.com/maps/api/directions/json?origin="+ogLocation+"&destination="+desnLocation+"&region=es&alternatives=true&key=AIzaSyCtssVj9zblsw-XYWC6sCPQ_gdMRgbaX5c";
+        if (desnLocation != null && ogLocation != null) {
+            String url = "https://maps.googleapis.com/maps/api/directions/json?origin=" + ogLocation + "&destination=" + desnLocation + "&region=es&alternatives=true&key=AIzaSyCtssVj9zblsw-XYWC6sCPQ_gdMRgbaX5c";
             drawDirection(url);
-            Log.d(TAG, "checkDone: "+url);
+            Log.d(TAG, "checkDone: " + url);
         }
 
     }
@@ -232,8 +270,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setOnPolylineClickListener(new GoogleMap.OnPolylineClickListener() {
             @Override
             public void onPolylineClick(Polyline polyline) {
-                for(Polyline line : listPolyOption)
-                {
+                for (Polyline line : listPolyOption) {
                     line.setColor(getResources().getColor(R.color.colorAlternatives));
                     line.setZIndex(1);
                 }
@@ -244,10 +281,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
 
-
     }
 
-    private void drawDirection(String url){
+    private void drawDirection(String url) {
 
         Ion.with(getApplicationContext())
                 .load(url)
@@ -258,18 +294,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
                         try {
-                            Log.d(TAG, "onCompleted: "+result);
+                            Log.d(TAG, "onCompleted: " + result);
                             JSONObject object = new JSONObject(result);
-                            if ( object.getString("status").trim().equals("OK")){
-                                Log.d(TAG, "onCompleted: "+object.getString("status"));
+                            if (object.getString("status").trim().equals("OK")) {
+                                Log.d(TAG, "onCompleted: " + object.getString("status"));
                                 JSONArray routes = object.getJSONArray("routes");
-                                for (int i =0; i<routes.length();i++){
+                                for (int i = 0; i < routes.length(); i++) {
                                     JSONObject route = routes.getJSONObject(i);
                                     JSONObject ovPolyline = route.getJSONObject("overview_polyline");
-                                    String points =ovPolyline.getString("points");
+                                    String points = ovPolyline.getString("points");
                                     PolylineOptions polylineOptions = new PolylineOptions();
                                     List<LatLng> list = decodePoly(points);
-                                    for (int j = 0; j< list.size(); j++) {
+                                    for (int j = 0; j < list.size(); j++) {
                                         polylineOptions.add(list.get(j));
                                     }
 
@@ -287,12 +323,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         } catch (JSONException e1) {
                             e1.printStackTrace();
                         }
-                        hideActionBar();
                         btnDirection.setVisibility(View.VISIBLE);
                     }
                 });
     }
-
 
 
     private List<LatLng> decodePoly(String encoded) {
@@ -329,7 +363,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void backCurrentLocation() {
-        mMap.animateCamera(CameraUpdateFactory.newLatLng(mlLatLng),500,null);
+        mMap.animateCamera(CameraUpdateFactory.newLatLng(mlLatLng), 500, null);
         mMarker.setPosition(mlLatLng);
     }
 

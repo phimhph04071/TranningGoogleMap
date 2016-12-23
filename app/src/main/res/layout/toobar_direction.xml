@@ -34,9 +34,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="28dp"
                 android:background="#1565C0"
+                android:ellipsize="end"
                 android:enabled="true"
                 android:focusable="false"
                 android:hint="Your location"
+                android:singleLine="true"
                 android:paddingLeft="16dp"
                 android:textSize="14sp" />
 
@@ -57,7 +59,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="28dp"
                 android:background="#1565C0"
+                android:ellipsize="end"
                 android:enabled="true"
+                android:singleLine="true"
                 android:focusable="false"
                 android:hint="Destination location"
                 android:paddingLeft="16dp"
