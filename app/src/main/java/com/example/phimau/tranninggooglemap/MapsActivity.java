@@ -76,6 +76,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private String provider;
     private String ogLocation;
     private String desnLocation;
+    private Marker dirMaker;
     private ArrayList<Polyline> listPolyOption;
     private boolean isgetDesLocation;
     private static final String TAG = "local";
@@ -148,7 +149,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onClick(View view) {
                 backCurrentLocation();
-                hideActionBar();
             }
         });
         btnDirection = (FloatingActionButton) findViewById(R.id.fabDirection);
@@ -183,6 +183,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 LatLng curLocation = getLocationCenterCamrare();
                 if (isgetDesLocation) {
                     desnLocation = curLocation.latitude+","+curLocation.longitude;
+                    dirMaker = mMap.addMarker(new MarkerOptions()
+                    .position(curLocation));
                 } else {
                     ogLocation = curLocation.latitude+","+curLocation.longitude;
                 }
